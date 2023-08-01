@@ -1,50 +1,11 @@
-FROM alpine:3.10
+FROM php:8.2.8-fpm-alpine3.18
 
-RUN apk add --update --no-cache \
-    coreutils \
-    php7-fpm \
-    php7-apcu \
-    php7-ctype \
-    php7-curl \
-    php7-dom \
-    php7-gd \
-    php7-iconv \
-    php7-imagick \
-    php7-json \
-    php7-intl \
-    php7-mcrypt \
-    php7-fileinfo\
-    php7-mbstring \
-    php7-opcache \
-    php7-openssl \
-    php7-pdo \
-    php7-pdo_mysql \
-    php7-mysqli \
-    php7-xml \
-    php7-zlib \
-    php7-phar \
-    php7-tokenizer \
-    php7-session \
-    php7-simplexml \
-    php7-xdebug \
-    php7-zip \
-    make \
-    curl
+COPY --from=composer:2.5.8 /usr/bin/composer /usr/bin/composer
 
-ENV COMPOSER_HOME=/var/data/.composer
-
-RUN echo "$(curl -sS https://composer.github.io/installer.sig) -" > composer-setup.php.sig \
-        && curl -sS https://getcomposer.org/installer | tee composer-setup.php | sha384sum -c composer-setup.php.sig \
-        && php composer-setup.php && rm composer-setup.php* \
-        && chmod +x composer.phar && mv composer.phar /usr/bin/composer \
-        && composer global require symfony/var-dumper
-
-COPY app.ini /etc/php7/conf.d/
-COPY app.ini /etc/php7/cli/conf.d/
-
-COPY app.pool.conf /etc/php7/php-fpm.d/
-
-CMD ["php-fpm7", "-F"]
+RUN apk add --no-cache icu-dev git zlib-dev pcre-dev ${PHPIZE_DEPS} \
+    && docker-php-ext-install opcache intl \
+    && pecl install apcu-5.1.22 \
+    && docker-php-ext-enable apcu \
+    && apk del pcre-dev ${PHPIZE_DEPS}
 
 WORKDIR /var/www/app
-EXPOSE 9001

@@ -1,29 +1,34 @@
 version: '3.7'
 services:
-    db:
-        image: mysql
-        command: ["--default-authentication-plugin=mysql_native_password"]
-        ports:
-            - "3306:3306"
-        restart: always
-        volumes:
-            - ./data/mysql:/var/lib/mysql
-        environment:
-            MYSQL_ROOT_PASSWORD: root
+    # db:
+    #     image: mysql
+    #     command: ["--default-authentication-plugin=mysql_native_password"]
+    #     ports:
+    #         - "3306:3306"
+    #     restart: always
+    #     volumes:
+    #         - ./data/mysql:/var/lib/mysql
+    #     environment:
+    #         MYSQL_ROOT_PASSWORD: root
     php:
         build: ./php-fpm
         ports:
             - "9000:9001"
         volumes:
             - ./app:/var/www/app
-        depends_on:
-            - db
-        links:
-            - db
+        expose:
+            - "9000"
+        # depends_on:
+        #     - db
+        # links:
+        #     - db
     nginx:
         build: ./nginx
         ports:
             - "80:80"
+        expose:
+            - "80"
+            - "443"
         depends_on:
             - php
         links:
