@@ -36,3 +36,10 @@ services:
         volumes:
             - ./app:/var/www/app
             - ./logs/nginx:/var/log/nginx
+    redis:
+        image: 'redis:7.0.12-alpine3.18'
+        restart: always
+        ports:
+            - '6379:6379'
+        volumes:
+            - ./data/redis:/data
